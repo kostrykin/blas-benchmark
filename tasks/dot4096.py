@@ -1,10 +1,8 @@
-import numpy as np
-
-
 name = 'Dotted two 4096x4096 matrices'
 
 
 def setup():
+    import numpy as np
     np.random.seed(0)
     return dict(
         A = np.random.randn(4096, 4096),
