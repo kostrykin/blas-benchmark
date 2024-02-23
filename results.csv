@@ -1,0 +1,5 @@
+"cpu_name";"task_id";"config_id";"seconds"
+"AMD EPYC 7763 64-Core Processor.json";"dot4096";"mkl2020.0";"3.436347246170044"
+"AMD EPYC 7763 64-Core Processor.json";"dot4096";"mkl2024.0";"3.36435866355896"
+"AMD EPYC 7763 64-Core Processor.json";"dot4096";"mkl2019.5";"3.5108602046966553"
+"AMD EPYC 7763 64-Core Processor.json";"dot4096";"mkl2020.0_debug";"3.179882049560547"

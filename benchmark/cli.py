@@ -10,6 +10,7 @@ import time
 import json
 import string
 import tempfile
+import csv
 
 
 tasks = dict()
@@ -55,6 +56,7 @@ if __name__ == '__main__':
     parser.add_argument('--config', help=argparse.SUPPRESS)
     parser.add_argument('--run', action='store_true', help='Run the benchmarks.')
     parser.add_argument('--task', nargs='*', default=list(), help='Run only specific task.')
+    parser.add_argument('--results-csv', default='results.csv', help='CSV with the results.')
     args = parser.parse_args()
 
     if args.config is None:
@@ -93,4 +95,21 @@ if __name__ == '__main__':
                 # Exit the child process.
                 os._exit(0)
     
-    # TODO: create csv summary
+    # Create summary CSV.
+    print(f'\nWriting results to: {args.results_csv}')
+    with open(args.results_csv, 'w') as fp:
+        csv_writer = csv.writer(fp, delimiter=';', quotechar='"', quoting=csv.QUOTE_ALL)
+        csv_writer.writerow(['cpu_name', 'task_id', 'config_id', 'seconds'])
+        for json_filepath in glob.glob('results/*/*/*.json'):
+            json_filepath = pathlib.Path(json_filepath)
+            with open(json_filepath, 'r') as fp_json:
+                data = json.load(fp_json)
+                for seconds in data:
+                    csv_writer.writerow(
+                        [
+                            json_filepath.name,
+                            json_filepath.parents[0].name,
+                            json_filepath.parents[1].name,
+                            seconds,
+                        ]
+                    )
