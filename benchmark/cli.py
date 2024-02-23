@@ -56,7 +56,7 @@ def run_config(config_id, explicit_task_list):
         runscript_filename = f'{prefix}/run.sh'
         with open(runscript_filename, mode='w') as fp:
             fp.write(template.substitute(config_id=config_id, prefix=prefix, args=args))
-        os.system(f'sh {runscript_filename}')
+        os.system(f'bash {runscript_filename}')
 
 
 def create_report(cpu_name, tasks, results_csv):
