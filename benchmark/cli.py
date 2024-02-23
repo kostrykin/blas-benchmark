@@ -112,6 +112,32 @@ if __name__ == '__main__':
         else:
             print('Use "--run" to run the above benchmarks.')
 
+        # Create summary CSV.
+        print(f'\nWriting results to: {args.results_csv}')
+        cpu_names = set()
+        with open(args.results_csv, 'w') as fp:
+            csv_writer = csv.writer(fp, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
+            csv_writer.writerow(['cpu_name', 'task_id', 'config_id', 'seconds'])
+            for json_filepath in glob.glob('results/*/*/*.json'):
+                json_filepath = pathlib.Path(json_filepath)
+                with open(json_filepath, 'r') as fp_json:
+                    data = json.load(fp_json)
+                    for seconds in data:
+                        cpu_name = json_filepath.name
+                        cpu_names.add(cpu_name)
+                        csv_writer.writerow(
+                            [
+                                cpu_name,
+                                json_filepath.parents[0].name,
+                                json_filepath.parents[1].name,
+                                seconds,
+                            ]
+                        )
+        
+        # Create reports.
+        for cpu_name in cpu_names:
+            create_report(cpu_name, tasks, args.results_csv)
+
     else:
         for task_id, task in tasks.items():
             if len(args.task) > 0 and task_id not in args.task: continue
@@ -132,29 +158,3 @@ if __name__ == '__main__':
 
                 # Exit the child process.
                 os._exit(0)
-
-    # Create summary CSV.
-    print(f'\nWriting results to: {args.results_csv}')
-    cpu_names = set()
-    with open(args.results_csv, 'w') as fp:
-        csv_writer = csv.writer(fp, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
-        csv_writer.writerow(['cpu_name', 'task_id', 'config_id', 'seconds'])
-        for json_filepath in glob.glob('results/*/*/*.json'):
-            json_filepath = pathlib.Path(json_filepath)
-            with open(json_filepath, 'r') as fp_json:
-                data = json.load(fp_json)
-                for seconds in data:
-                    cpu_name = json_filepath.name
-                    cpu_names.add(cpu_name)
-                    csv_writer.writerow(
-                        [
-                            cpu_name,
-                            json_filepath.parents[0].name,
-                            json_filepath.parents[1].name,
-                            seconds,
-                        ]
-                    )
-    
-    # Create reports.
-    for cpu_name in cpu_names:
-        create_report(cpu_name, tasks, args.results_csv)
