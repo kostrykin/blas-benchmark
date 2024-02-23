@@ -122,7 +122,7 @@ if __name__ == '__main__':
                 with open(json_filepath, 'r') as fp_json:
                     data = json.load(fp_json)
                     for seconds in data:
-                        cpu_name = json_filepath.name
+                        cpu_name = json_filepath.stem
                         cpu_names.add(cpu_name)
                         csv_writer.writerow(
                             [
