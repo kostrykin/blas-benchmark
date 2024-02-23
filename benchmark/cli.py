@@ -13,9 +13,6 @@ import tempfile
 import csv
 import itertools
 
-import nbformat as nbf
-from nbconvert.preprocessors import ExecutePreprocessor
-
 
 tasks = dict()
 for task_filepath in glob.glob('tasks/*.py'):
@@ -62,6 +59,9 @@ def run_config(config_id, explicit_task_list):
 
 
 def create_report(cpu_name, tasks, results_csv):
+    import nbformat as nbf
+    from nbconvert.preprocessors import ExecutePreprocessor
+
     nb = nbf.v4.new_notebook()
     nb['cells'] = [
         nbf.v4.new_markdown_cell(f'# {cpu_name}'),
@@ -79,8 +79,8 @@ def create_report(cpu_name, tasks, results_csv):
                 f'df_task[["config_id", "seconds"]].sort_values("seconds", ascending=False)'
             ),
         ]
-    ep = ExecutePreprocessor()
-    ep.preprocess(nb)
+
+    ExecutePreprocessor().preprocess(nb)
     os.makedirs('reports', exist_ok=True)
     with open(f'reports/{cpu_name}.ipynb', 'w') as fp:
         nbf.write(nb, fp)
