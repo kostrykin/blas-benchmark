@@ -3,10 +3,10 @@ channels:
 - defaults
 
 dependencies:
-- blas=*=mkl
-- mkl==2019.5
+- blas=*=openblas
+- openblas==0.3.26
 - python==3.8
 - numpy
 
 variables:
-  MKL_NUM_THREADS: 2
+  OPENBLAS_NUM_THREADS: 2

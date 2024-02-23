@@ -8,3 +8,5 @@ conda env create -f "results/${config_id}/environment.yml" --prefix "$$CONDA_PRE
 conda activate "$$CONDA_PREFIX"
 
 python -m benchmark.cli ${args} --config "${config_id}"
+
+conda deactivate

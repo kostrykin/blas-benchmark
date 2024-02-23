@@ -13,6 +13,13 @@ import tempfile
 import csv
 import itertools
 
+try:
+    import nbformat as nbf
+    from nbconvert.preprocessors import ExecutePreprocessor
+
+except ImportError:
+    pass
+
 
 tasks = dict()
 for task_filepath in glob.glob('tasks/*.py'):
@@ -31,7 +38,8 @@ else:
     cpu_name = None
 
 
-def timeit(func, min_repeat_time=10):
+#def timeit(func, min_repeat_time=10):
+def timeit(func, min_repeat_time=1):
     time0 = time.time()
     for run_num in itertools.count(1):
         func()
@@ -48,6 +56,7 @@ def run_task(output_filepath, task, best_of=3):
 
 
 def run_config(config_id, explicit_task_list):
+    print(f'*** Running configuration: {config_id}\n')
     args = ' '.join(f'--task "{task_id}"' for task_id in explicit_task_list)
     with open('templates/runscript.sh') as fp:
         template = string.Template(fp.read())
@@ -59,9 +68,6 @@ def run_config(config_id, explicit_task_list):
 
 
 def create_report(cpu_name, tasks, results_csv):
-    import nbformat as nbf
-    from nbconvert.preprocessors import ExecutePreprocessor
-
     nb = nbf.v4.new_notebook()
     nb['cells'] = [
         nbf.v4.new_markdown_cell(f'# {cpu_name}'),
@@ -79,7 +85,6 @@ def create_report(cpu_name, tasks, results_csv):
                 f'df_task[["config_id", "seconds"]].sort_values("seconds", ascending=False)'
             ),
         ]
-
     ExecutePreprocessor().preprocess(nb)
     os.makedirs('reports', exist_ok=True)
     with open(f'reports/{cpu_name}.ipynb', 'w') as fp:
@@ -130,7 +135,7 @@ if __name__ == '__main__':
 
                 # Exit the child process.
                 os._exit(0)
-    
+
     # Create summary CSV.
     print(f'\nWriting results to: {args.results_csv}')
     cpu_names = set()
