@@ -9,5 +9,5 @@ dependencies:
 - numpy
 
 variables:
-  MKL_DEBUG_CPU_TYPE:
+  MKL_DEBUG_CPU_TYPE: 5
   MKL_NUM_THREADS: 2
