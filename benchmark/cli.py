@@ -31,8 +31,7 @@ else:
     cpu_name = None
 
 
-#def timeit(func, min_repeat_time=10):
-def timeit(func, min_repeat_time=1):
+def timeit(func, min_repeat_time=10):
     time0 = time.time()
     for run_num in itertools.count(1):
         func()
@@ -81,7 +80,7 @@ def create_report(cpu_name, tasks, results_csv):
                 f'df_task[["config_id", "seconds"]].sort_values("seconds", ascending=False)'
             ),
         ]
-        
+
     ExecutePreprocessor().preprocess(nb)
     os.makedirs('reports', exist_ok=True)
     with open(f'reports/{cpu_name}.ipynb', 'w') as fp:
