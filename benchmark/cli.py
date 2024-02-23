@@ -11,6 +11,7 @@ import json
 import string
 import tempfile
 import csv
+import itertools
 
 import nbformat as nbf
 from nbconvert.preprocessors import ExecutePreprocessor
@@ -33,13 +34,20 @@ else:
     cpu_name = None
 
 
-def run_task(output_filepath, task):
-    kwargs = task.setup()
+def timeit(func, min_repeat_time=10):
     time0 = time.time()
-    task.benchmark(**kwargs)
-    dt = time.time() - time0
+    for run_num in itertools.count(1):
+        func()
+        dt = time.time() - time0
+        if dt >= min_repeat_time:
+            return dt / run_num
+
+
+def run_task(output_filepath, task, best_of=3):
+    kwargs = task.setup()
+    times = [timeit(lambda: task.benchmark(**kwargs)) for _ in range(best_of)]
     with open(output_filepath, 'w') as fp:
-        json.dump([dt], fp)
+        json.dump([min(times)], fp)
 
 
 def run_config(config_id, explicit_task_list):
