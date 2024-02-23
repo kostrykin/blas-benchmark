@@ -9,4 +9,5 @@ dependencies:
 - numpy
 
 variables:
+  MKL_DEBUG_CPU_TYPE:
   OPENBLAS_NUM_THREADS: 2
