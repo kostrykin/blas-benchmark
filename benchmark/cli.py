@@ -12,6 +12,9 @@ import string
 import tempfile
 import csv
 
+import nbformat as nbf
+from nbconvert.preprocessors import ExecutePreprocessor
+
 
 tasks = dict()
 for task_filepath in glob.glob('tasks/*.py'):
@@ -30,7 +33,7 @@ else:
     cpu_name = None
 
 
-def run_task(output_filepath, task_id, task):
+def run_task(output_filepath, task):
     kwargs = task.setup()
     time0 = time.time()
     task.benchmark(**kwargs)
@@ -41,13 +44,38 @@ def run_task(output_filepath, task_id, task):
 
 def run_config(config_id, explicit_task_list):
     args = ' '.join(f'--task "{task_id}"' for task_id in explicit_task_list)
-    with open('runscript_template.sh') as fp:
+    with open('templates/runscript.sh') as fp:
         template = string.Template(fp.read())
     with tempfile.TemporaryDirectory() as prefix:
         runscript_filename = f'{prefix}/run.sh'
         with open(runscript_filename, mode='w') as fp:
             fp.write(template.substitute(config_id=config_id, prefix=prefix, args=args))
         os.system(f'sh {runscript_filename}')
+
+
+def create_report(cpu_name, tasks, results_csv):
+    nb = nbf.v4.new_notebook()
+    nb['cells'] = [
+        nbf.v4.new_markdown_cell(f'# {cpu_name}'),
+            nbf.v4.new_code_cell(f'import pandas as pd'),
+            nbf.v4.new_code_cell(
+                f'df = pd.read_csv("{results_csv}")\n' + \
+                f'df = df[df["cpu_name"] == "{cpu_name}"]'
+            ),
+    ]
+    for task_id, task in tasks.items():
+        nb['cells'] += [
+            nbf.v4.new_markdown_cell(f'### {task.name}'),
+            nbf.v4.new_code_cell(
+                f'df_task = df[df["task_id"] == "{task_id}"]\n' + \
+                f'df_task[["config_id", "seconds"]].sort_values("seconds", ascending=False)'
+            ),
+        ]
+    ep = ExecutePreprocessor()
+    ep.preprocess(nb)
+    os.makedirs('reports', exist_ok=True)
+    with open(f'reports/{cpu_name}.ipynb', 'w') as fp:
+        nbf.write(nb, fp)
 
 
 if __name__ == '__main__':
@@ -90,13 +118,14 @@ if __name__ == '__main__':
                 # Run the benchmark task.
                 output_directory = f'results/{args.config}/{task_id}'
                 os.makedirs(output_directory, exist_ok=True)
-                run_task(f'{output_directory}/{cpu_name}.json', task_id, task)
+                run_task(f'{output_directory}/{cpu_name}.json', task)
 
                 # Exit the child process.
                 os._exit(0)
     
     # Create summary CSV.
     print(f'\nWriting results to: {args.results_csv}')
+    cpu_names = set()
     with open(args.results_csv, 'w') as fp:
         csv_writer = csv.writer(fp, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
         csv_writer.writerow(['cpu_name', 'task_id', 'config_id', 'seconds'])
@@ -105,11 +134,17 @@ if __name__ == '__main__':
             with open(json_filepath, 'r') as fp_json:
                 data = json.load(fp_json)
                 for seconds in data:
+                    cpu_name = json_filepath.name
+                    cpu_names.add(cpu_name)
                     csv_writer.writerow(
                         [
-                            json_filepath.name,
+                            cpu_name,
                             json_filepath.parents[0].name,
                             json_filepath.parents[1].name,
                             seconds,
                         ]
                     )
+    
+    # Create reports.
+    for cpu_name in cpu_names:
+        create_report(cpu_name, tasks, args.results_csv)

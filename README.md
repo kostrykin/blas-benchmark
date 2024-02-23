@@ -5,7 +5,7 @@
 python -m benchmark.cli --run
 ```
 
-Or only update the results:
+Or only update the reports:
 ```
 python -m benchmark.cli
 ```
