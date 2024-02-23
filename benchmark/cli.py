@@ -98,7 +98,7 @@ if __name__ == '__main__':
     # Create summary CSV.
     print(f'\nWriting results to: {args.results_csv}')
     with open(args.results_csv, 'w') as fp:
-        csv_writer = csv.writer(fp, delimiter=';', quotechar='"', quoting=csv.QUOTE_ALL)
+        csv_writer = csv.writer(fp, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
         csv_writer.writerow(['cpu_name', 'task_id', 'config_id', 'seconds'])
         for json_filepath in glob.glob('results/*/*/*.json'):
             json_filepath = pathlib.Path(json_filepath)
