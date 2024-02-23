@@ -38,29 +38,42 @@ def run_task(output_filepath, task_id, task):
         json.dump([dt], fp)
 
 
-def run_config(config_id):
+def run_config(config_id, explicit_task_list):
+    args = ' '.join(f'--task "{task_id}"' for task_id in explicit_task_list)
     with open('runscript_template.sh') as fp:
         template = string.Template(fp.read())
     with tempfile.TemporaryDirectory() as prefix:
         runscript_filename = f'{prefix}/run.sh'
-        with open(runscript_filename, mode='w', suffix='.sh') as fp:
-            fp.write(template.substitute(config_id=config_id, prefix=prefix))
-        os.system(runscript_filename)
+        with open(runscript_filename, mode='w') as fp:
+            fp.write(template.substitute(config_id=config_id, prefix=prefix, args=args))
+        os.system(f'sh {runscript_filename}')
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config')
+    parser.add_argument('--config', help=argparse.SUPPRESS)
+    parser.add_argument('--run', help='Run the benchmarks.')
+    parser.add_argument('--task', nargs='*', default=list(), help='Run only specific task.')
     args = parser.parse_args()
 
-    if parser.config is None:
+    if args.config is None:
+        config_id_list = list()
         for config_path in glob.glob('results/*'):
-            config_id = pathlib.Path(config_path).stem
-            run_config(config_id)
+            config_id = pathlib.Path(config_path).name
+            config_id_list.append(config_id)
+            print(f'- Found config: {config_id}')
+        
+        if args.run:
+            for config_id in config_id_list:
+                run_config(config_id, args.task)
+
+        else:
+            print('\nUse "--run" to run the above benchmarks.')
 
     else:
         for task_id, task in tasks.items():
+            if len(args.task) > 0 and task_id not in args.task: continue
 
             newpid = os.fork()
             if newpid != 0:
@@ -72,7 +85,7 @@ if __name__ == '__main__':
             else:
                 
                 # Run the benchmark task.
-                output_directory = f'results/{task_id}'
+                output_directory = f'results/{args.config}/{task_id}'
                 os.makedirs(output_directory, exist_ok=True)
                 run_task(f'{output_directory}/{cpu_name}.json', task_id, task)
 
