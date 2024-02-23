@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', help=argparse.SUPPRESS)
-    parser.add_argument('--run', help='Run the benchmarks.')
+    parser.add_argument('--run', action='store_true', help='Run the benchmarks.')
     parser.add_argument('--task', nargs='*', default=list(), help='Run only specific task.')
     args = parser.parse_args()
 
