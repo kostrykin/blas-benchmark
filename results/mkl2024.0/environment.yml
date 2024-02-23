@@ -4,9 +4,6 @@ channels:
 
 dependencies:
 - blas=*=mkl
-- mkl==2020.0
+- mkl==2024.0
 - python==3.8
 - numpy
-
-variables:
-  MKL_DEBUG_CPU_TYPE: 5

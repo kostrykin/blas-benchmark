@@ -34,7 +34,7 @@ def run_task(output_filepath, task_id, task):
     time0 = time.time()
     task.benchmark(**kwargs)
     dt = time.time() - time0
-    with output_filepath.open('w') as fp:
+    with open(output_filepath, 'w') as fp:
         json.dump([dt], fp)
 
 
@@ -64,12 +64,13 @@ if __name__ == '__main__':
             config_id_list.append(config_id)
             print(f'- Found config: {config_id}')
         
+        print()
         if args.run:
             for config_id in config_id_list:
                 run_config(config_id, args.task)
 
         else:
-            print('\nUse "--run" to run the above benchmarks.')
+            print('Use "--run" to run the above benchmarks.')
 
     else:
         for task_id, task in tasks.items():
@@ -91,3 +92,5 @@ if __name__ == '__main__':
 
                 # Exit the child process.
                 os._exit(0)
+    
+    # TODO: create csv summary
