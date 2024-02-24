@@ -7,6 +7,7 @@ dependencies:
 - mkl==2019.5
 - python==3.8
 - numpy
+- cvxpy
 
 variables:
   MKL_DEBUG_CPU_TYPE: 5
