@@ -12,6 +12,7 @@ import string
 import tempfile
 import csv
 import itertools
+import math
 
 
 tasks = dict()
@@ -31,18 +32,37 @@ else:
     cpu_name = None
 
 
-def run_task(output_filepath, task, best_of=3, min_repeat_time=10):
+def timeit(func, *args, **kwargs):
+    time0 = time.time()
+    task.benchmark(*args, **kwargs)
+    return time.time() - time0
+
+
+def run_task(output_filepath, task, best_of=3, min_measure_time=10):
+
+    # Run pre-analysis to determine the *rough* runtime
+    kwargs = task.setup(0)
+    dt0 = timeit(task.benchmark, **kwargs)
+
+    # Compute the likely required number of parameters
+    n = math.ceil(min_repeat_time / n)
+    kwargs_list = [task.setup(i + 1) for i in range(n)]
+
+    # Perform analysis multiple times...
     times = list()
     for _ in range(best_of):
-        dt = 0
-        for run_num in itertools.count(1):
-            kwargs = task.setup(run_num)
-            time0 = time.time()
+
+        # ...and each time for at least `min_measure_time` seconds
+        time0 = time.time()
+        for run_idx in itertools.count(0):
+            kwargs = kwargs_list[run_idx % len(kwargs_list)]
             task.benchmark(**kwargs)
-            dt += time.time() - time0
-            if dt >= min_repeat_time:
+            dt = time.time() - time0
+            if dt >= min_measure_time:
                 break
-        times.append(dt / run_num)
+        times.append(dt / (run_idx + 1))
+
+    # Keep the best time
     with open(output_filepath, 'w') as fp:
         json.dump([min(times)], fp)
 
@@ -112,7 +132,7 @@ if __name__ == '__main__':
         else:
             print('Use "--run" to run the above benchmarks.')
 
-        # Create summary CSV.
+        # Create summary CSV
         print(f'\nWriting results to: {args.results_csv}')
         cpu_names = set()
         with open(args.results_csv, 'w') as fp:
@@ -134,7 +154,7 @@ if __name__ == '__main__':
                             ]
                         )
         
-        # Create reports.
+        # Create reports
         for cpu_name in cpu_names:
             create_report(cpu_name, tasks, args.results_csv)
 
@@ -145,16 +165,16 @@ if __name__ == '__main__':
             newpid = os.fork()
             if newpid != 0:
 
-                # Wait for the child process.
+                # Wait for the child process
                 if os.waitpid(newpid, 0)[1] != 0:
                     sys.exit(1)
 
             else:
                 
-                # Run the benchmark task.
+                # Run the benchmark task
                 output_directory = f'results/{args.config}/{task_id}'
                 os.makedirs(output_directory, exist_ok=True)
                 run_task(f'{output_directory}/{cpu_name}.json', task)
 
-                # Exit the child process.
+                # Exit the child process
                 os._exit(0)
