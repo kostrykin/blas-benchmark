@@ -34,7 +34,7 @@ Tasks are defined in `tasks/*.py`. The Conda environments, which specify differe
   </tr>
 </table>
 
-The *score* of a configuration is the *geometric mean* of the best possible speed-up in comparison to the other configurations.
+The *score* of a configuration is the *geometric mean* of the best possible speed-up in comparison to the other configurations. See `reports/*.ipynb` for details.
 
 **Run the benchmark on your CPU:**
 ```
