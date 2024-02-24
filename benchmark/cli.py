@@ -38,7 +38,7 @@ def timeit(func, *args, **kwargs):
     return time.time() - time0
 
 
-def run_task(output_filepath, task, best_of=3, min_measure_time=10):
+def run_task(output_filepath, task_id, task, best_of=3, min_measure_time=10):
 
     # Run pre-analysis to determine the *rough* runtime
     kwargs = task.setup(0)
@@ -46,7 +46,7 @@ def run_task(output_filepath, task, best_of=3, min_measure_time=10):
 
     # Compute the likely required number of parameters
     n = math.ceil(min_measure_time / dt0)
-    print(f'Pre-computing benchmark parameters for n={n} repetition(s)')
+    print(f'{task_id}: Pre-computing benchmark parameters for n={n} repetition(s)')
     kwargs_list = [task.setup(i + 1) for i in range(n)]
 
     # Perform analysis multiple times...
@@ -175,7 +175,7 @@ if __name__ == '__main__':
                 # Run the benchmark task
                 output_directory = f'results/{args.config}/{task_id}'
                 os.makedirs(output_directory, exist_ok=True)
-                run_task(f'{output_directory}/{cpu_name}.json', task)
+                run_task(f'{output_directory}/{cpu_name}.json', task_id, task)
 
                 # Exit the child process
                 os._exit(0)
