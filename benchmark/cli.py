@@ -38,7 +38,7 @@ def run_task(output_filepath, task, best_of=3, min_repeat_time=10):
         for run_num in itertools.count(1):
             kwargs = task.setup(run_num)
             time0 = time.time()
-            test.benchmark(kwargs)
+            task.benchmark(**kwargs)
             dt += time.time() - time0
             if dt >= min_repeat_time:
                 break
