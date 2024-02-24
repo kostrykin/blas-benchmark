@@ -3,8 +3,9 @@
 Tasks are defined in `tasks/*.py`. The Conda environments, which specify different BLAS and with which the tasks should be run, are defined in `results/*/environment.yml`. To determine the runtime of a task, the task is repeated for at least 10 seconds, and the average is determined. The repetition and averaging procedure is repeated 3 times, and the best result is used.
 
 **Main results:**
-- [reports/AMD EPYC 7763 64-Core Processor.ipynb](https://github.com/kostrykin/blas-benchmark/blob/master/reports/AMD%20EPYC%207763%2064-Core%20Processor.ipynb)
-- [reports/AMD Ryzen Threadripper 3970X 32-Core Processor.ipynb](https://github.com/kostrykin/blas-benchmark/blob/master/reports/AMD%20Ryzen%20Threadripper%203970X%2032-Core%20Processor.ipynb)
+- [reports/AMD EPYC 7763 64-Core Processor.ipynb (2 threads)](https://github.com/kostrykin/blas-benchmark/blob/master/reports/AMD%20EPYC%207763%2064-Core%20Processor.ipynb)
+- [reports/AMD Ryzen Threadripper 3970X 32-Core Processor.ipynb (2 threads)](https://github.com/kostrykin/blas-benchmark/blob/master/reports/AMD%20Ryzen%20Threadripper%203970X%2032-Core%20Processor.ipynb)
+- [reports/AMD Ryzen Threadripper 3970X 32-Core Processor.ipynb (16 threads)](https://github.com/kostrykin/blas-benchmark/blob/num-threads-16/reports/AMD%20Ryzen%20Threadripper%203970X%2032-Core%20Processor.ipynb)
 
 **Run the benchmark on your CPU:**
 ```
