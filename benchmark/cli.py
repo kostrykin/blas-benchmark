@@ -45,7 +45,8 @@ def run_task(output_filepath, task, best_of=3, min_measure_time=10):
     dt0 = timeit(task.benchmark, **kwargs)
 
     # Compute the likely required number of parameters
-    n = math.ceil(min_repeat_time / n)
+    n = math.ceil(min_measure_time / dt0)
+    print(f'Pre-computing benchmark parameters for n={n} repetition(s)')
     kwargs_list = [task.setup(i + 1) for i in range(n)]
 
     # Perform analysis multiple times...
