@@ -96,6 +96,7 @@ def create_report(cpu_name, tasks, results_csv):
                 f'df = pd.read_csv("{results_csv}")\n' + \
                 f'df = df[df["cpu_name"] == "{cpu_name}"]'
             ),
+            nbf.v4.new_markdown_cell(f'## Highscore'),
             nbf.v4.new_code_cell(
                 'configs = df["config_id"].unique()\n' + \
                 'scores = {config_id: list() for config_id in configs}\n' + \
@@ -109,8 +110,9 @@ def create_report(cpu_name, tasks, results_csv):
                 'mean_scores = {config_id: np.prod(scores[config_id]) / len(scores[config_id])}\n' + \
                 'mean_scores = [np.prod(scores[config_id]) / len(scores[config_id]) for config_id in configs]\n' + \
                 'df_scores = pd.DataFrame.from_dict(dict(config_id=configs, score=mean_scores))\n' + \
-                'df_scores.sort_values("score", ascending=False)'
+                'df_scores.sort_values("score", ascending=False).reset_index(drop=True)'
             ),
+            nbf.v4.new_markdown_cell(f'## Benchmark details'),
     ]
     for task_id in sorted(tasks.keys(), key=lambda task_id: tasks[task_id].order):
         task = tasks[task_id]
