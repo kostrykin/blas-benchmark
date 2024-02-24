@@ -88,10 +88,28 @@ def create_report(cpu_name, tasks, results_csv):
     nb = nbf.v4.new_notebook()
     nb['cells'] = [
         nbf.v4.new_markdown_cell(f'# {cpu_name}'),
-            nbf.v4.new_code_cell(f'import pandas as pd'),
+            nbf.v4.new_code_cell(
+                'import pandas as pd\n' + \
+                'import numpy as np'
+            ),
             nbf.v4.new_code_cell(
                 f'df = pd.read_csv("{results_csv}")\n' + \
                 f'df = df[df["cpu_name"] == "{cpu_name}"]'
+            ),
+            nbf.v4.new_code_cell(
+                'configs = df["config_id"].unique()\n' + \
+                'scores = {config_id: list() for config_id in configs}\n' + \
+                'for task_id in df["task_id"].unique():\n' + \
+                '    df_task = df[df["task_id"] == task_id]\n' + \
+                '    for config_id in configs:\n' + \
+                '        config_seconds = df_task[df_task["config_id"] == config_id]["seconds"].min()\n' + \
+                '        ref_seconds = df_task["seconds"].max()\n' + \
+                '        max_speedup = ref_seconds / config_seconds\n' + \
+                '        scores[config_id].append(max_speedup)\n' + \
+                'mean_scores = {config_id: np.prod(scores[config_id]) / len(scores[config_id])}\n' + \
+                'mean_scores = [np.prod(scores[config_id]) / len(scores[config_id]) for config_id in configs]\n' + \
+                'df_scores = pd.DataFrame.from_dict(dict(config_id=configs, score=mean_scores))\n' + \
+                'df_scores.sort_values("score", ascending=False)'
             ),
     ]
     for task_id in sorted(tasks.keys(), key=lambda task_id: tasks[task_id].order):
