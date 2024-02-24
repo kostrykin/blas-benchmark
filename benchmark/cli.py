@@ -70,7 +70,7 @@ def run_task(output_filepath, task_id, task, best_of=3, min_measure_time=10, max
 
 
 def run_config(config_id, explicit_task_list):
-    print(f'*** Running configuration: {config_id}\n')
+    print(f'\n*** Running configuration: {config_id}\n')
     args = ' '.join(f'--task "{task_id}"' for task_id in explicit_task_list)
     with open('templates/runscript.sh') as fp:
         template = string.Template(fp.read())
