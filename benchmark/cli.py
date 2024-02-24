@@ -38,15 +38,16 @@ def timeit(func, *args, **kwargs):
     return time.time() - time0
 
 
-def run_task(output_filepath, task_id, task, best_of=3, min_measure_time=10):
+def run_task(output_filepath, task_id, task, best_of=3, min_measure_time=10, max_n=100):
 
     # Run pre-analysis to determine the *rough* runtime
     kwargs = task.setup(0)
     dt0 = timeit(task.benchmark, **kwargs)
 
     # Compute the likely required number of parameters
-    n = math.ceil(min_measure_time / dt0)
-    print(f'{task_id}: Pre-computing benchmark parameters for n={n} repetition(s)')
+    m = math.ceil(min_measure_time / dt0)
+    n = min((m, max_n))
+    print(f'{task_id}: Pre-computing n={n} benchmark parameters for about {m} repetition(s)')
     kwargs_list = [task.setup(i + 1) for i in range(n)]
 
     # Perform analysis multiple times...
@@ -112,16 +113,23 @@ def create_report(cpu_name, tasks, results_csv):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', help=argparse.SUPPRESS)
+    parser.add_argument('--run-config', help=argparse.SUPPRESS)
     parser.add_argument('--run', action='store_true', help='Run the benchmarks.')
+    parser.add_argument('--config', nargs='*', default=list(), help='Run only specific configuration.')
     parser.add_argument('--task', nargs='*', default=list(), help='Run only specific task.')
     parser.add_argument('--results-csv', default='results.csv', help='CSV with the results.')
     args = parser.parse_args()
 
-    if args.config is None:
+    illegal_tasks = [task_id for task_id in args.task if task_id not in tasks.keys()]
+    if len(illegal_tasks) > 0:
+        parser.error('No such tasks: ' + ', '.join(illegal_tasks))
+        sys.exit(1)
+
+    if args.run_config is None:
         config_id_list = list()
         for config_path in glob.glob('results/*'):
             config_id = pathlib.Path(config_path).name
+            if len(args.config) > 0 and config_id not in args.config: continue
             config_id_list.append(config_id)
             print(f'- Found config: {config_id}')
         
@@ -168,12 +176,13 @@ if __name__ == '__main__':
 
                 # Wait for the child process
                 if os.waitpid(newpid, 0)[1] != 0:
+                    print('*** AN ERROR OCCURRED ***')
                     sys.exit(1)
 
             else:
                 
                 # Run the benchmark task
-                output_directory = f'results/{args.config}/{task_id}'
+                output_directory = f'results/{args.run_config}/{task_id}'
                 os.makedirs(output_directory, exist_ok=True)
                 run_task(f'{output_directory}/{cpu_name}.json', task_id, task)
 
