@@ -1,9 +1,10 @@
 name = 'Eigendecomposition of a 2048x2048 matrix'
+order = 2001
 
 
-def setup():
+def setup(run_id):
     import numpy as np
-    np.random.seed(0)
+    np.random.seed(run_id)
     return dict(
         np = np,
         A = np.random.randn(2048, 2048),

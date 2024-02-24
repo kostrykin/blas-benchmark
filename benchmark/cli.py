@@ -31,18 +31,18 @@ else:
     cpu_name = None
 
 
-def timeit(func, min_repeat_time=10):
-    time0 = time.time()
-    for run_num in itertools.count(1):
-        func()
-        dt = time.time() - time0
-        if dt >= min_repeat_time:
-            return dt / run_num
-
-
-def run_task(output_filepath, task, best_of=3):
-    kwargs = task.setup()
-    times = [timeit(lambda: task.benchmark(**kwargs)) for _ in range(best_of)]
+def run_task(output_filepath, task, best_of=3, min_repeat_time=10):
+    times = list()
+    for _ in range(best_of):
+        dt = 0
+        for run_num in itertools.count(1):
+            kwargs = task.setup(run_num)
+            time0 = time.time()
+            test.benchmark(kwargs)
+            dt += time.time() - time0
+            if dt >= min_repeat_time:
+                break
+        times.append(dt / run_num)
     with open(output_filepath, 'w') as fp:
         json.dump([min(times)], fp)
 
@@ -72,7 +72,8 @@ def create_report(cpu_name, tasks, results_csv):
                 f'df = df[df["cpu_name"] == "{cpu_name}"]'
             ),
     ]
-    for task_id, task in tasks.items():
+    for task_id in sorted(tasks.keys(), key=lambda task_id: tasks[task_id].order):
+        task = tasks[task_id]
         nb['cells'] += [
             nbf.v4.new_markdown_cell(f'### {task.name}'),
             nbf.v4.new_code_cell(

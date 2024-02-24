@@ -1,9 +1,10 @@
 name = 'SVD of a 2048x1024 matrix'
+order = 2000
 
 
-def setup():
+def setup(run_id):
     import numpy as np
-    np.random.seed(0)
+    np.random.seed(run_id)
     return dict(
         np = np,
         A = np.random.randn(2048, 1024),
