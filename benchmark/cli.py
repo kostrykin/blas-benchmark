@@ -108,16 +108,16 @@ def create_report(cpu_name, tasks, results_csv):
                 '        max_speedup = ref_seconds / config_seconds\n' + \
                 '        scores[config_id].append(max_speedup)\n' + \
                 'mean_scores = {config_id: np.prod(scores[config_id]) / len(scores[config_id])}\n' + \
-                'mean_scores = [np.prod(scores[config_id]) / len(scores[config_id]) for config_id in configs]\n' + \
+                'mean_scores = [pow(np.prod(scores[config_id]), 1 / len(scores[config_id])) for config_id in configs]\n' + \
                 'df_scores = pd.DataFrame.from_dict(dict(config_id=configs, score=mean_scores))\n' + \
                 'df_scores.sort_values("score", ascending=False).reset_index(drop=True)'
             ),
             nbf.v4.new_markdown_cell(f'## Benchmark details'),
     ]
-    for task_id in sorted(tasks.keys(), key=lambda task_id: tasks[task_id].order):
+    for task_idx, task_id in enumerate(sorted(tasks.keys(), key=lambda task_id: tasks[task_id].order)):
         task = tasks[task_id]
         nb['cells'] += [
-            nbf.v4.new_markdown_cell(f'### {task.name}'),
+            nbf.v4.new_markdown_cell(f'### Task {task_idx + 1}: {task.name}'),
             nbf.v4.new_code_cell(
                 f'df_task = df[df["task_id"] == "{task_id}"]\n' + \
                 f'df_task[["config_id", "seconds"]].sort_values("seconds", ascending=False)'
