@@ -139,12 +139,17 @@ if __name__ == '__main__':
     parser.add_argument('--config', nargs='*', default=list(), help='Run only specific configuration.')
     parser.add_argument('--task', nargs='*', default=list(), help='Run only specific task.')
     parser.add_argument('--results-csv', default='results.csv', help='CSV with the results.')
+    parser.add_argument('--clean', action='store_true', help='Remove all previous results (from all CPUs).')
     args = parser.parse_args()
 
     illegal_tasks = [task_id for task_id in args.task if task_id not in tasks.keys()]
     if len(illegal_tasks) > 0:
         parser.error('No such tasks: ' + ', '.join(illegal_tasks))
         sys.exit(1)
+
+    if args.clean:
+        for json_filepath in glob.glob('results/*/*/*.json'):
+            os.remove(json_filepath)
 
     if args.run_config is None:
         config_id_list = list()
