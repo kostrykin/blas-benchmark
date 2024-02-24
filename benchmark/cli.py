@@ -96,7 +96,8 @@ def create_report(cpu_name, tasks, results_csv):
                 f'df = pd.read_csv("{results_csv}")\n' + \
                 f'df = df[df["cpu_name"] == "{cpu_name}"]'
             ),
-            nbf.v4.new_markdown_cell(f'## Highscore'),
+            nbf.v4.new_markdown_cell('## Highscore'),
+            nbf.v4.new_markdown_cell('The *score* of a configuration is the *geometric mean* of the best possible speed-up in comparison to the other configurations.'),
             nbf.v4.new_code_cell(
                 'configs = df["config_id"].unique()\n' + \
                 'scores = {config_id: list() for config_id in configs}\n' + \
