@@ -25,7 +25,8 @@ from .profiles import (
 def run_config(config_id, explicit_task_list, profiles):
     print(f'\n*** Running configuration: {config_id}\n')
     args = f'--profile "{profile["id"]}"'
-    args += ' '.join(f'--task "{task_id}"' for task_id in explicit_task_list)
+    if len(explicit_task_list) > 0:
+        args += '--task ' + ' '.join(f'"{task_id}"' for task_id in explicit_task_list)
     with open('templates/runscript.sh') as fp:
         template = string.Template(fp.read())
     for profile in profiles:
@@ -137,7 +138,7 @@ if __name__ == '__main__':
                 run_config(config_id, args.task, profiles)
 
         else:
-            print('Use "--run" to run the above benchmarks.')
+            print(f'Use "--run" to run the above benchmarks (profiles: {", ".join(args.profile)}).')
 
         # Create summary CSV
         print(f'\nWriting results to: {args.results_csv}')
