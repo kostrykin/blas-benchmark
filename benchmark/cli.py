@@ -104,18 +104,18 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--run-config', help=argparse.SUPPRESS)
     parser.add_argument('--run', action='store_true', help='Run the benchmarks.')
-    parser.add_argument('--config', nargs='*', default=list(), help='Run only specific configuration.')
-    parser.add_argument('--task', nargs='*', default=list(), help='Run only specific task.')
-    parser.add_argument('--profile', nargs='+', default=list(), help='Run only for specific profiles.')
+    parser.add_argument('--configs', nargs='*', default=list(), help='Run only specific configurations.')
+    parser.add_argument('--tasks', nargs='*', default=list(), help='Run only specific tasks.')
+    parser.add_argument('--profiles', nargs='+', default=list(), help='Run only for specific profiles.')
     parser.add_argument('--results-csv', default='results.csv', help='CSV with the results.')
     parser.add_argument('--clean', action='store_true', help='Remove all previous results (from all CPUs).')
     args = parser.parse_args()
 
-    illegal_tasks = [task_id for task_id in args.task if task_id not in tasks.keys()]
+    illegal_tasks = [task_id for task_id in args.tasks if task_id not in tasks.keys()]
     if len(illegal_tasks) > 0:
         parser.error('No such tasks: ' + ', '.join(illegal_tasks))
 
-    illegal_profiles = [profile_id for profile_id in args.profile if profile_id not in profiles.keys()]
+    illegal_profiles = [profile_id for profile_id in args.profiles if profile_id not in profiles.keys()]
     if len(illegal_profiles) > 0:
         parser.error('No such profiles: ' + ', '.join(illegal_profiles))
 
@@ -127,18 +127,18 @@ if __name__ == '__main__':
         config_id_list = list()
         for config_path in glob.glob('results/*'):
             config_id = pathlib.Path(config_path).name
-            if len(args.config) > 0 and config_id not in args.config: continue
+            if len(args.configs) > 0 and config_id not in args.configs: continue
             config_id_list.append(config_id)
             print(f'- Found config: {config_id}')
         
         print()
         if args.run:
-            profiles = [profiles[profile_id] for profile_id in args.profile]
+            profiles = [profiles[profile_id] for profile_id in args.profiles]
             for config_id in config_id_list:
-                run_config(config_id, args.task, profiles)
+                run_config(config_id, args.tasks, profiles)
 
         else:
-            print(f'Use "--run" to run the above benchmarks (profiles: {", ".join(args.profile)}).')
+            print(f'Use "--run" to run the above benchmarks (profiles: {", ".join(args.profiles)}).')
 
         # Create summary CSV
         print(f'\nWriting results to: {args.results_csv}')
@@ -170,8 +170,8 @@ if __name__ == '__main__':
 
     else:
         for task_id, task in tasks.items():
-            if len(args.task) > 0 and task_id not in args.task: continue
-            for profile_id in args.profile:
+            if len(args.tasks) > 0 and task_id not in args.tasks: continue
+            for profile_id in args.profiles:
 
                 newpid = os.fork()
                 if newpid != 0:
