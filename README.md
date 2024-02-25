@@ -12,9 +12,9 @@ The configurations <code>mkl2020.0_debug</code> and <code>mkl2020.1_fakeintel</c
     <th colspan="2">AMD Ryzen Threadripper 3970X</th>
     <th>AMD EPYC 7763</th>
   <tr>
-    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/dev-profiles/reports/py38_2threads/AMD%20Ryzen%20Threadripper%203970X%2032-Core%20Processor.ipynb">2 threads</a></td>
-    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/dev-profiles/reports/py38_16threads/AMD%20Ryzen%20Threadripper%203970X%2032-Core%20Processor.ipynb">16 threads</a></td>
-    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/dev-profiles/reports/py38_2threads/AMD%20EPYC%207763%2064-Core%20Processor.ipynb">2 threads</a></td>
+    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/master/reports/py38_2threads/AMD%20Ryzen%20Threadripper%203970X%2032-Core%20Processor.ipynb">2 threads</a></td>
+    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/master/reports/py38_16threads/AMD%20Ryzen%20Threadripper%203970X%2032-Core%20Processor.ipynb">16 threads</a></td>
+    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/master/reports/py38_2threads/AMD%20EPYC%207763%2064-Core%20Processor.ipynb">2 threads</a></td>
   </tr>
   <tr>
     <td><code>openblas</code></td>
