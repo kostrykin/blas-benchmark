@@ -1,12 +1,8 @@
 import argparse
 import glob
-import importlib
 import pathlib
-import subprocess
-import re
 import os
 import sys
-import time
 import json
 import string
 import tempfile
@@ -14,74 +10,38 @@ import csv
 import itertools
 import math
 
-
-tasks = dict()
-for task_filepath in glob.glob('tasks/*.py'):
-    if task_filepath == 'tasks/__init__.py': continue
-    task_filepath = pathlib.Path(task_filepath)
-    task_id = task_filepath.stem
-    task = importlib.import_module(f'tasks.{task_id}')
-    tasks[task_id] = task
-
-
-cpu_info = frozenset(subprocess.check_output('cat /proc/cpuinfo |grep -i "model name"', shell=True).decode().strip().split('\n'))
-if len(cpu_info) == 1:
-    cpu_info = next(iter(cpu_info))
-    cpu_name = re.match(r'^.+: +(.+)$', cpu_info).group(1)
-else:
-    cpu_name = None
+from .tasks import (
+    tasks,
+    run_task,
+)
+from .cpuinfo import (
+    cpu_name,
+)
+from .profiles import (
+    profiles,
+)
 
 
-def timeit(func, *args, **kwargs):
-    time0 = time.time()
-    task.benchmark(*args, **kwargs)
-    return time.time() - time0
-
-
-def run_task(output_filepath, task_id, task, best_of=3, min_measure_time=10, max_n=100):
-
-    # Run pre-analysis to determine the *rough* runtime
-    kwargs = task.setup(0)
-    dt0 = timeit(task.benchmark, **kwargs)
-
-    # Compute the likely required number of parameters
-    m = math.ceil(min_measure_time / dt0)
-    n = min((m, max_n))
-    print(f'{task_id}: Pre-computing n={n} benchmark parameters for about {m} repetition(s)')
-    kwargs_list = [task.setup(i + 1) for i in range(n)]
-
-    # Perform analysis multiple times...
-    times = list()
-    for _ in range(best_of):
-
-        # ...and each time for at least `min_measure_time` seconds
-        time0 = time.time()
-        for run_idx in itertools.count(0):
-            kwargs = kwargs_list[run_idx % len(kwargs_list)]
-            task.benchmark(**kwargs)
-            dt = time.time() - time0
-            if dt >= min_measure_time:
-                break
-        times.append(dt / (run_idx + 1))
-
-    # Keep the best time
-    with open(output_filepath, 'w') as fp:
-        json.dump([min(times)], fp)
-
-
-def run_config(config_id, explicit_task_list):
+def run_config(config_id, explicit_task_list, profiles):
     print(f'\n*** Running configuration: {config_id}\n')
-    args = ' '.join(f'--task "{task_id}"' for task_id in explicit_task_list)
+    args = f'--profile "{profile["id"]}"'
+    args += ' '.join(f'--task "{task_id}"' for task_id in explicit_task_list)
     with open('templates/runscript.sh') as fp:
         template = string.Template(fp.read())
-    with tempfile.TemporaryDirectory() as prefix:
-        runscript_filename = f'{prefix}/run.sh'
-        with open(runscript_filename, mode='w') as fp:
-            fp.write(template.substitute(config_id=config_id, prefix=prefix, args=args))
-        os.system(f'bash {runscript_filename}')
+    for profile in profiles:
+        with open(f'results/{config_id}/environment.yml') as fp:
+            conda_env_template = string.Template(fp.read())
+        with tempfile.TemporaryDirectory() as prefix:
+            conda_env_filename = f'{prefix}/env.yml'
+            with open(conda_env_filename, mode='w') as fp:
+                fp.write(conda_env_template.substitute(**profile))
+            runscript_filename = f'{prefix}/run.sh'
+            with open(runscript_filename, mode='w') as fp:
+                fp.write(template.substitute(config_id=config_id, prefix=prefix, args=args, conda_env_filename=conda_env_filename))
+            os.system(f'bash {runscript_filename}')
 
 
-def create_report(cpu_name, tasks, results_csv):
+def create_report(profile, cpu_name, tasks, results_csv):
     import nbformat as nbf
     from nbconvert.preprocessors import ExecutePreprocessor
 
@@ -94,7 +54,14 @@ def create_report(cpu_name, tasks, results_csv):
             ),
             nbf.v4.new_code_cell(
                 f'df = pd.read_csv("{results_csv}")\n' + \
-                f'df = df[df["cpu_name"] == "{cpu_name}"]'
+                f'df = df[df["cpu_name"] == "{cpu_name}"]\n' + \
+                f'df = df[df["profile_id"] == "{profile["id"]}"]'
+            ),
+            nbf.v4.new_markdown_cell(
+                f'**Profile:**\n' + \
+                f'```json\n' + \
+                f'{json.dumps(profile)}\n' + \
+                f'```'
             ),
             nbf.v4.new_markdown_cell('## Highscore'),
             nbf.v4.new_markdown_cell('The *score* of a configuration is the *geometric mean* of the best possible speed-up in comparison to the other configurations.'),
@@ -108,7 +75,6 @@ def create_report(cpu_name, tasks, results_csv):
                 '        ref_seconds = df_task["seconds"].max()\n' + \
                 '        max_speedup = ref_seconds / config_seconds\n' + \
                 '        scores[config_id].append(max_speedup)\n' + \
-                'mean_scores = {config_id: np.prod(scores[config_id]) / len(scores[config_id])}\n' + \
                 'mean_scores = [pow(np.prod(scores[config_id]), 1 / len(scores[config_id])) for config_id in configs]\n' + \
                 'df_scores = pd.DataFrame.from_dict(dict(config_id=configs, score=mean_scores))\n' + \
                 'df_scores.sort_values("score", ascending=False).reset_index(drop=True)'
@@ -126,8 +92,9 @@ def create_report(cpu_name, tasks, results_csv):
         ]
 
     ExecutePreprocessor().preprocess(nb)
-    os.makedirs('reports', exist_ok=True)
-    with open(f'reports/{cpu_name}.ipynb', 'w') as fp:
+    output_directory = f'reports/{profile["id"]}'
+    os.makedirs(output_directory, exist_ok=True)
+    with open(f'{output_directory}/{cpu_name}.ipynb', 'w') as fp:
         nbf.write(nb, fp)
 
 
@@ -138,6 +105,7 @@ if __name__ == '__main__':
     parser.add_argument('--run', action='store_true', help='Run the benchmarks.')
     parser.add_argument('--config', nargs='*', default=list(), help='Run only specific configuration.')
     parser.add_argument('--task', nargs='*', default=list(), help='Run only specific task.')
+    parser.add_argument('--profile', nargs='+', default=list(), help='Run only for specific profiles.')
     parser.add_argument('--results-csv', default='results.csv', help='CSV with the results.')
     parser.add_argument('--clean', action='store_true', help='Remove all previous results (from all CPUs).')
     args = parser.parse_args()
@@ -145,10 +113,13 @@ if __name__ == '__main__':
     illegal_tasks = [task_id for task_id in args.task if task_id not in tasks.keys()]
     if len(illegal_tasks) > 0:
         parser.error('No such tasks: ' + ', '.join(illegal_tasks))
-        sys.exit(1)
+
+    illegal_profiles = [profile_id for profile_id in args.profile if profile_id not in profiles.keys()]
+    if len(illegal_profiles) > 0:
+        parser.error('No such profiles: ' + ', '.join(illegal_profiles))
 
     if args.clean:
-        for json_filepath in glob.glob('results/*/*/*.json'):
+        for json_filepath in glob.glob('results/*/*/*/*.json'):
             os.remove(json_filepath)
 
     if args.run_config is None:
@@ -161,8 +132,9 @@ if __name__ == '__main__':
         
         print()
         if args.run:
+            profiles = [profiles[profile_id] for profile_id in args.profile]
             for config_id in config_id_list:
-                run_config(config_id, args.task)
+                run_config(config_id, args.task, profiles)
 
         else:
             print('Use "--run" to run the above benchmarks.')
@@ -172,8 +144,8 @@ if __name__ == '__main__':
         cpu_names = set()
         with open(args.results_csv, 'w') as fp:
             csv_writer = csv.writer(fp, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
-            csv_writer.writerow(['cpu_name', 'task_id', 'config_id', 'seconds'])
-            for json_filepath in glob.glob('results/*/*/*.json'):
+            csv_writer.writerow(['cpu_name', 'task_id', 'config_id', 'profile_id', 'seconds'])
+            for json_filepath in glob.glob('results/*/*/*/*.json'):
                 json_filepath = pathlib.Path(json_filepath)
                 with open(json_filepath, 'r') as fp_json:
                     data = json.load(fp_json)
@@ -184,6 +156,7 @@ if __name__ == '__main__':
                             [
                                 cpu_name,
                                 json_filepath.parents[0].name,
+                                json_filepath.parents[2].name,
                                 json_filepath.parents[1].name,
                                 seconds,
                             ]
@@ -191,26 +164,28 @@ if __name__ == '__main__':
         
         # Create reports
         for cpu_name in cpu_names:
-            create_report(cpu_name, tasks, args.results_csv)
+            for profile in profiles.values():
+                create_report(profile, cpu_name, tasks, args.results_csv)
 
     else:
         for task_id, task in tasks.items():
             if len(args.task) > 0 and task_id not in args.task: continue
+            for profile_id in args.profile:
 
-            newpid = os.fork()
-            if newpid != 0:
+                newpid = os.fork()
+                if newpid != 0:
 
-                # Wait for the child process
-                if os.waitpid(newpid, 0)[1] != 0:
-                    print('*** AN ERROR OCCURRED ***')
-                    sys.exit(1)
+                    # Wait for the child process
+                    if os.waitpid(newpid, 0)[1] != 0:
+                        print('*** AN ERROR OCCURRED ***')
+                        sys.exit(1)
 
-            else:
-                
-                # Run the benchmark task
-                output_directory = f'results/{args.run_config}/{task_id}'
-                os.makedirs(output_directory, exist_ok=True)
-                run_task(f'{output_directory}/{cpu_name}.json', task_id, task)
+                else:
+                    
+                    # Run the benchmark task
+                    output_directory = f'results/{args.run_config}/{profile_id}/{task_id}'
+                    os.makedirs(output_directory, exist_ok=True)
+                    run_task(f'{output_directory}/{cpu_name}.json', task_id, task)
 
-                # Exit the child process
-                os._exit(0)
+                    # Exit the child process
+                    os._exit(0)

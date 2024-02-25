@@ -1,3 +1,4 @@
 pyarrow
 pandas
 numpy
+pyyaml

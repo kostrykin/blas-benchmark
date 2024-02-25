@@ -5,7 +5,7 @@ export CONDA_PREFIX="${prefix}/${config_id}/env"
 export BOOTSTRAP_SH="results/${config_id}/bootstrap.sh"
 
 echo "Conda environment: $$CONDA_PREFIX"
-conda env create -f "results/${config_id}/environment.yml" --prefix "$$CONDA_PREFIX" > "${prefix}/${config_id}.log"
+conda env create -f "${conda_env_filename}" --prefix "$$CONDA_PREFIX" > "${prefix}/${config_id}.log"
 
 conda activate "$$CONDA_PREFIX"
 

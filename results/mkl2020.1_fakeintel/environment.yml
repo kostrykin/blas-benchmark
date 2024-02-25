@@ -5,11 +5,11 @@ channels:
 dependencies:
 - blas=*=mkl
 - mkl==2020.1
-- python==3.8
+- python==${python}
 - numpy
 - cvxpy
 - gcc_linux-64
 
 variables:
   MKL_DEBUG_CPU_TYPE:
-  MKL_NUM_THREADS: 2
+  MKL_NUM_THREADS: ${threads}
