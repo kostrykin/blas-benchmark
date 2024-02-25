@@ -4,33 +4,41 @@ Tasks are defined in `tasks/*.py`. The Conda environments, which specify differe
 
 **Main results:**
 
+The configurations <code>mkl2020.0_debug</code> and <code>mkl2020.1_fakeintel</code> perform overall best:
+
 <table>
   <tr>
     <th rowspan="2">&nbsp;</th>
     <th colspan="2">AMD Ryzen Threadripper 3970X</th>
     <th>AMD EPYC 7763</th>
   <tr>
-    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/master/reports/AMD%20Ryzen%20Threadripper%203970X%2032-Core%20Processor.ipynb">2 threads</a></td>
-    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/num-threads-16/reports/AMD%20Ryzen%20Threadripper%203970X%2032-Core%20Processor.ipynb">16 threads</a></td>
-    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/master/reports/AMD%20EPYC%207763%2064-Core%20Processor.ipynb">2 threads</a></td>
+    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/dev-profiles/reports/py38_2threads/AMD%20Ryzen%20Threadripper%203970X%2032-Core%20Processor.ipynb">2 threads</a></td>
+    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/dev-profiles/reports/py38_16threads/AMD%20Ryzen%20Threadripper%203970X%2032-Core%20Processor.ipynb">16 threads</a></td>
+    <td><a href="https://github.com/kostrykin/blas-benchmark/blob/dev-profiles/reports/py38_2threads/AMD%20EPYC%207763%2064-Core%20Processor.ipynb">2 threads</a></td>
   </tr>
   <tr>
     <td><code>openblas</code></td>
-    <td>1.010879</td>
-    <td>1.050159</td>
-    <td>1.009635</td>
+    <td>1.003829</td>
+    <td>1.019895</td>
+    <td>1.016262</td>
   </tr>
   <tr>
     <td><code>mkl2024.0</code></td>
-    <td>1.139014</td>
-    <td>1.257208</td>
-    <td>1.058759</td>
+    <td>1.128423</td>
+    <td>1.213864</td>
+    <td>1.065984</td>
   </tr>
   <tr>
     <td><code>mkl2020.0_debug</code></td>
-    <td><b>1.162179</b></td>
-    <td><b>1.266565</b></td>
-    <td><b>1.159550</b></td>
+    <td><b>1.156737</b></td>
+    <td>1.261223</td>
+    <td>1.162273</td>
+  </tr>
+  <tr>
+    <td><code>mkl2020.1_fakeintel</code></td>
+    <td>1.144065</td>
+    <td><b>1.281782</b></td>
+    <td><b>1.164156</b></td>
   </tr>
 </table>
 
@@ -38,7 +46,7 @@ The *score* of a configuration is the *geometric mean* of the best possible spee
 
 **Run the benchmark on your CPU:**
 ```
-python -m benchmark.cli --run
+python -m benchmark.cli --profiles py38_2threads py38_16threads --run
 ```
 
 Or only update the reports:

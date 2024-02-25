@@ -5,10 +5,10 @@ channels:
 dependencies:
 - blas=*=openblas
 - openblas==0.3.26
-- python==3.8
+- python==${python}
 - numpy
 - cvxpy
 
 variables:
   MKL_DEBUG_CPU_TYPE:
-  OPENBLAS_NUM_THREADS: 2
+  OPENBLAS_NUM_THREADS: ${threads}

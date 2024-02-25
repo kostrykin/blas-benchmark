@@ -1,0 +1,7 @@
+py38_2threads:
+  python: 3.8
+  threads: 2
+
+py38_16threads:
+  python: 3.8
+  threads: 16
