@@ -2,6 +2,9 @@ import glob
 import time
 import pathlib
 import importlib
+import math
+import itertools
+import json
 
 
 tasks = dict()
@@ -15,7 +18,7 @@ for task_filepath in glob.glob('tasks/*.py'):
 
 def timeit(func, *args, **kwargs):
     time0 = time.time()
-    task.benchmark(*args, **kwargs)
+    func(*args, **kwargs)
     return time.time() - time0
 
 

@@ -7,8 +7,6 @@ import json
 import string
 import tempfile
 import csv
-import itertools
-import math
 
 from .taskmgr import (
     tasks,
@@ -22,7 +20,7 @@ from .profiles import (
 )
 
 
-def run_config(config_id, explicit_task_list, profiles):
+def run_config(config_id, explicit_task_list, profiles_list):
     print(f'\n*** Running configuration: {config_id}')
     if len(explicit_task_list) == 0:
         args = []
@@ -30,7 +28,7 @@ def run_config(config_id, explicit_task_list, profiles):
         args = ['--task ' + ' '.join(f'"{task_id}"' for task_id in explicit_task_list)]
     with open('templates/runscript.sh') as fp:
         template = string.Template(fp.read())
-    for profile in profiles:
+    for profile in profiles_list:
         args.append(f'--profile "{profile["id"]}"')
         args_str = ' '.join(args)
         print()
@@ -137,9 +135,9 @@ if __name__ == '__main__':
         
         print()
         if args.run:
-            profiles = [profiles[profile_id] for profile_id in args.profiles]
+            profiles_list = [profiles[profile_id] for profile_id in args.profiles]
             for config_id in config_id_list:
-                run_config(config_id, args.tasks, profiles)
+                run_config(config_id, args.tasks, profiles_list)
 
         else:
             print(f'Use "--run" to run the above benchmarks (profiles: {", ".join(args.profiles)}).')

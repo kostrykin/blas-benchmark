@@ -17,6 +17,7 @@ then
     source "$$BOOTSTRAP_SH" "${prefix}" "results/${config_id}"
 fi
 
-python -m benchmark.cli ${args} --run-config "${config_id}" | sed "s/^/[${profile_id}]  /"
+#python -m benchmark.cli ${args} --run-config "${config_id}" | sed -u "s/^/[${profile_id}] /"
+python -m benchmark.cli ${args} --run-config "${config_id}"
 
 conda deactivate
