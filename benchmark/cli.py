@@ -108,7 +108,7 @@ if __name__ == '__main__':
     parser.add_argument('--run', action='store_true', help='Run the benchmarks.')
     parser.add_argument('--configs', nargs='*', default=list(), help='Run only specific configurations.')
     parser.add_argument('--tasks', nargs='*', default=list(), help='Run only specific tasks.')
-    parser.add_argument('--profiles', nargs='+', default=list(), help='Run only for specific profiles.')
+    parser.add_argument('--profiles', nargs='*', default=list(), help='Run only for specific profiles.')
     parser.add_argument('--results-csv', default='results.csv', help='CSV with the results.')
     parser.add_argument('--clean', action='store_true', help='Remove all previous results (from all CPUs).')
     args = parser.parse_args()
@@ -124,6 +124,9 @@ if __name__ == '__main__':
     if args.clean:
         for json_filepath in glob.glob('results/*/*/*/*.json'):
             os.remove(json_filepath)
+
+    if len(args.profiles) == 0:
+        parser.error('No profiles specified')
 
     if args.run_config is None:
         config_id_list = list()
