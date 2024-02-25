@@ -37,7 +37,7 @@ def run_config(config_id, explicit_task_list, profiles):
                 fp.write(conda_env_template.substitute(**profile))
             runscript_filename = f'{prefix}/run.sh'
             with open(runscript_filename, mode='w') as fp:
-                fp.write(template.substitute(config_id=config_id, prefix=prefix, args=args, conda_env_filename=conda_env_filename))
+                fp.write(template.substitute(config_id=config_id, profile_id=profile['id'], prefix=prefix, args=args, conda_env_filename=conda_env_filename))
             os.system(f'bash {runscript_filename}')
 
 
