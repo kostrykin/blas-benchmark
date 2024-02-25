@@ -2,7 +2,7 @@
 
 Tasks are defined in `tasks/*.py`. The Conda environments, which specify different BLAS and with which the tasks should be run, are defined in `results/*/environment.yml`. To determine the runtime of a task, the task is repeated for at least 10 seconds, and the average is determined. The repetition and averaging procedure is repeated 3 times, and the best result is used.
 
-**Main results:**
+## Main results:
 
 The configurations <code>mkl2020.0_debug</code> and <code>mkl2020.1_fakeintel</code> perform overall best:
 
@@ -44,7 +44,9 @@ The configurations <code>mkl2020.0_debug</code> and <code>mkl2020.1_fakeintel</c
 
 The *score* of a configuration is the *geometric mean* of the best possible speed-up in comparison to the other configurations. See `reports/*.ipynb` for details.
 
-**Run the benchmark on your CPU:**
+## Benchmark CLI:
+
+Run the benchmark on your CPU:
 ```
 python -m benchmark.cli --profiles py38_2threads py38_16threads --run
 ```
@@ -54,7 +56,7 @@ Or only update the reports:
 python -m benchmark.cli
 ```
 
-**Acknowledgements:**
+## Acknowledgements:
 - <https://gist.github.com/cty-yyds/41bcfa6a71670527c93049aa9a5d249f>
 - <https://gist.github.com/bebosudo/6f43dc6b4329c197f258f25cc69f0ec0>
 - <https://danieldk.eu/Posts/2020-08-31-MKL-Zen.html>
