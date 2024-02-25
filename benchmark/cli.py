@@ -23,13 +23,17 @@ from .profiles import (
 
 
 def run_config(config_id, explicit_task_list, profiles):
-    print(f'\n*** Running configuration: {config_id}\n')
-    args = f'--profile "{profile["id"]}"'
-    if len(explicit_task_list) > 0:
-        args += '--task ' + ' '.join(f'"{task_id}"' for task_id in explicit_task_list)
+    print(f'\n*** Running configuration: {config_id}')
+    if len(explicit_task_list) == 0:
+        args = []
+    else:
+        args = ['--task ' + ' '.join(f'"{task_id}"' for task_id in explicit_task_list)]
     with open('templates/runscript.sh') as fp:
         template = string.Template(fp.read())
     for profile in profiles:
+        args.append(f'--profile "{profile["id"]}"')
+        args_str = ' '.join(args)
+        print()
         with open(f'results/{config_id}/environment.yml') as fp:
             conda_env_template = string.Template(fp.read())
         with tempfile.TemporaryDirectory() as prefix:
@@ -38,7 +42,7 @@ def run_config(config_id, explicit_task_list, profiles):
                 fp.write(conda_env_template.substitute(**profile))
             runscript_filename = f'{prefix}/run.sh'
             with open(runscript_filename, mode='w') as fp:
-                fp.write(template.substitute(config_id=config_id, profile_id=profile['id'], prefix=prefix, args=args, conda_env_filename=conda_env_filename))
+                fp.write(template.substitute(config_id=config_id, profile_id=profile['id'], prefix=prefix, args=args_str, conda_env_filename=conda_env_filename))
             os.system(f'bash {runscript_filename}')
 
 
