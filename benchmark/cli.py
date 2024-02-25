@@ -10,7 +10,7 @@ import csv
 import itertools
 import math
 
-from .tasks import (
+from .taskmgr import (
     tasks,
     run_task,
 )
@@ -190,7 +190,11 @@ if __name__ == '__main__':
                     # Run the benchmark task
                     output_directory = f'results/{args.run_config}/{profile_id}/{task_id}'
                     os.makedirs(output_directory, exist_ok=True)
-                    run_task(f'{output_directory}/{cpu_name}.json', task_id, task)
+                    try:
+                        run_task(f'{output_directory}/{cpu_name}.json', task_id, task)
+                    except:
+                        print(f'Error while processing task: {task_id}')
+                        raise
 
                     # Exit the child process
                     os._exit(0)

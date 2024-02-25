@@ -5,9 +5,12 @@ export CONDA_PREFIX="${prefix}/${config_id}/env"
 export BOOTSTRAP_SH="results/${config_id}/bootstrap.sh"
 
 echo "[${profile_id}] Conda environment: $$CONDA_PREFIX"
-conda env create -f "${conda_env_filename}" --prefix "$$CONDA_PREFIX" > "${prefix}/${config_id}.log"
+conda env create -f "${conda_env_filename}" --prefix "$$CONDA_PREFIX" >> "${prefix}/${config_id}.log"
 
 conda activate "$$CONDA_PREFIX"
+
+conda install -y -c conda-forge -c defaults pip >> "${prefix}/${config_id}.log"
+pip install -r requirements.txt >> "${prefix}/${config_id}.log"
 
 if [ -f "$$BOOTSTRAP_SH" ]
 then
