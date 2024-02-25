@@ -1,6 +1,8 @@
 # blas-benchmark
 
-Tasks are defined in `tasks/*.py`. The Conda environments, which specify the different BLAS configurations, are defined in `results/*/environment.yml`. Python versions and numbers of threads are defined in `profiles.yml`. To determine the runtime of a task, each task is repeated for at least 10 seconds, and the average is determined. The repetition and averaging procedure is repeated 3 times, and the best result is used.
+Tasks are defined in `tasks/*.py`. The Conda environments, which specify the different BLAS configurations, are defined in `results/*/environment.yml`. Python versions and numbers of threads are defined in `profiles.yml`.
+
+To determine the runtime of a task, each task is repeated for at least 10 seconds, and the average is determined. The repetition and averaging procedure is repeated 3 times, and the best result is used.
 
 ## Main results:
 
