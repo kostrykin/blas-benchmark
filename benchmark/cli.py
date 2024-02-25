@@ -125,9 +125,6 @@ if __name__ == '__main__':
         for json_filepath in glob.glob('results/*/*/*/*.json'):
             os.remove(json_filepath)
 
-    if len(args.profiles) == 0:
-        parser.error('No profiles specified')
-
     if args.run_config is None:
         config_id_list = list()
         for config_path in glob.glob('results/*'):
@@ -138,12 +135,17 @@ if __name__ == '__main__':
         
         print()
         if args.run:
+            if len(args.profiles) == 0:
+                parser.error('No profiles specified')
             profiles_list = [profiles[profile_id] for profile_id in args.profiles]
             for config_id in config_id_list:
                 run_config(config_id, args.tasks, profiles_list)
 
         else:
-            print(f'Use "--run" to run the above benchmarks (profiles: {", ".join(args.profiles)}).')
+            if len(args.profiles) == 0:
+                print('No profiles specified')
+            else:
+                print(f'Use "--run" to run the above benchmarks (profiles: {", ".join(args.profiles)}).')
 
         # Create summary CSV
         print(f'\nWriting results to: {args.results_csv}')
