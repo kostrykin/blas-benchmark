@@ -38,7 +38,7 @@ The *score* of a configuration is the *geometric mean* of the best possible spee
 
 **Run the benchmark on your CPU:**
 ```
-python -m benchmark.cli --run
+python -m benchmark.cli --profiles py38_2threads py38_16threads --run
 ```
 
 Or only update the reports:
