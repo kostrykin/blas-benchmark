@@ -4,6 +4,8 @@ Tasks are defined in `tasks/*.py`. The Conda environments, which specify differe
 
 **Main results:**
 
+The configurations <code>mkl2020.0_debug</code> and <code>mkl2020.1_fakeintel</code> perform overall best:
+
 <table>
   <tr>
     <th rowspan="2">&nbsp;</th>
@@ -16,21 +18,27 @@ Tasks are defined in `tasks/*.py`. The Conda environments, which specify differe
   </tr>
   <tr>
     <td><code>openblas</code></td>
-    <td>1.010879</td>
-    <td>1.050159</td>
-    <td>1.009635</td>
+    <td>1.003829</td>
+    <td>1.019895</td>
+    <td>1.016262</td>
   </tr>
   <tr>
     <td><code>mkl2024.0</code></td>
-    <td>1.139014</td>
-    <td>1.257208</td>
-    <td>1.058759</td>
+    <td>1.128423</td>
+    <td>1.213864</td>
+    <td>1.065984</td>
   </tr>
   <tr>
     <td><code>mkl2020.0_debug</code></td>
-    <td><b>1.162179</b></td>
-    <td><b>1.266565</b></td>
-    <td><b>1.159550</b></td>
+    <td><b>1.156737</b></td>
+    <td>1.261223</td>
+    <td>1.162273</td>
+  </tr>
+  <tr>
+    <td><code>mkl2020.1_fakeintel</code></td>
+    <td>1.144065</td>
+    <td><b>1.281782</b></td>
+    <td><b>1.164156</b></td>
   </tr>
 </table>
 
